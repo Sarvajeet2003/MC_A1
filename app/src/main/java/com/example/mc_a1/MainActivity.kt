@@ -1,6 +1,6 @@
 package com.example.mc_a1
+
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -9,6 +9,7 @@ import android.widget.ToggleButton
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import java.util.concurrent.atomic.AtomicInteger
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,6 +17,7 @@ class MainActivity : AppCompatActivity() {
 
         val journeyManager = JourneyManager(this)
         journeyManager.initialize()
+
         val nextStopButton: Button = findViewById(R.id.nextStopButton)
         nextStopButton.setOnClickListener {
             journeyManager.moveToNextStop()
@@ -25,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         toggleButton.setOnCheckedChangeListener { _, isChecked ->
             journeyManager.updateDistanceUnit(isChecked)
         }
+
         val gifImageView: ImageView = findViewById(R.id.gifImageView)
         Glide.with(this)
             .asGif()
@@ -32,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             .into(gifImageView)
     }
 }
+
 class JourneyManager(private val activity: AppCompatActivity) {
     private var isDistanceInKm = true
     private lateinit var distanceCoveredTextView: TextView
@@ -41,18 +45,23 @@ class JourneyManager(private val activity: AppCompatActivity) {
     private lateinit var sampleStops: List<Stop>
     private var totalDistance: Int = 0
     private val currentStopIndex = AtomicInteger(0)
+
     data class Stop(val name: String, val distance: Int)
+
     fun initialize() {
         distanceCoveredTextView = findViewById(R.id.distanceCoveredTextView)
         distanceLeftTextView = findViewById(R.id.distanceLeftTextView)
         journeyProgressBar = findViewById(R.id.journeyProgressBar)
         progressTextView = findViewById(R.id.progressTextView)
-        // Use lazy list by default
-        sampleStops = getSampleStops(useLazyList = true)
+
+//        sampleStops = getSampleStops(useLazyList = true)
+        sampleStops = getSampleStops()
         totalDistance = calculateTotalDistance(sampleStops)
+
         updateDistanceTextViews()
         updateProgress(0)
     }
+
     fun moveToNextStop() {
         if (currentStopIndex.get() < sampleStops.size) {
             val currentStop = sampleStops[currentStopIndex.getAndIncrement()]
@@ -63,10 +72,12 @@ class JourneyManager(private val activity: AppCompatActivity) {
             println("Journey completed!")
         }
     }
+
     fun updateDistanceUnit(isKm: Boolean) {
         isDistanceInKm = isKm
         updateDistanceTextViews()
     }
+
     private fun updateProgress(distanceCovered: Int) {
         val progress = if (currentStopIndex.get() < sampleStops.size - 1) {
             (distanceCovered.toDouble() / totalDistance.toDouble() * 100).toInt()
@@ -76,6 +87,7 @@ class JourneyManager(private val activity: AppCompatActivity) {
         journeyProgressBar.progress = progress
         progressTextView.text = "Progress: $progress%"
     }
+
     private fun updateDistanceTextViews() {
         val currentStop = sampleStops[currentStopIndex.get()]
         val distanceCovered = currentStop.distance
@@ -97,26 +109,31 @@ class JourneyManager(private val activity: AppCompatActivity) {
 
         val nextStopsText = buildString {
             for (i in currentStopIndex.get() until sampleStops.size) {
-                append(sampleStops[i].name)
+//                append("${sampleStops[i].name} (${sampleStops[i].distance} km)\n")
+                append("${sampleStops[i].name} \n")
                 if (i < sampleStops.size - 1) {
                     append(" -> ")
                 }
             }
         }
+
         val nextStop = if (currentStopIndex.get() < sampleStops.size - 1) {
-            "Next Stops: $nextStopsText"
+            "Current Stop: $nextStopsText\n"
         } else {
             "Final Stop Reached"
         }
+
         distanceCoveredTextView.text = "$distanceCoveredText\n$nextStop"
         distanceLeftTextView.text = distanceLeftText
     }
+
     private fun calculateTotalDistance(stops: List<Stop>): Int {
         if (stops.isEmpty()) {
             return 0
         }
         return stops.last().distance
     }
+
     fun getSampleStops(useLazyList: Boolean = false): List<Stop> {
         if (useLazyList) {
             // Create a lazy list of stops
@@ -133,7 +150,7 @@ class JourneyManager(private val activity: AppCompatActivity) {
                         7 -> Stop("Belgaum, Karnataka", 2315)
                         8 -> Stop("Hubli, Karnataka", 2480)
                         9 -> Stop("Bangalore, Karnataka", 2570)
-                        else -> null // Stop generating after 10 stops
+                        else -> null
                     }
                 }
                 .takeWhile { it != null }
@@ -142,19 +159,46 @@ class JourneyManager(private val activity: AppCompatActivity) {
         } else {
             return listOf(
                 Stop("Delhi", 0),
+                Stop("Agra, Uttar Pradesh", 150),
                 Stop("Jaipur, Rajasthan", 280),
+                Stop("Kota, Rajasthan", 350),
                 Stop("Ajmer, Rajasthan", 415),
+                Stop("Udaipur, Rajasthan", 550),
                 Stop("Ahmedabad, Gujarat", 945),
+                Stop("Vadodara, Gujarat", 1100),
+                Stop("Surat, Gujarat", 1300),
                 Stop("Mumbai, Maharashtra", 1475),
+                Stop("Thane, Maharashtra", 1600),
                 Stop("Pune, Maharashtra", 2005),
-                Stop("Hubli, Karnataka", 2155),
+                Stop("Satara, Maharashtra", 2150),
+                Stop("Kolhapur, Maharashtra", 2250),
                 Stop("Belgaum, Karnataka", 2315),
+                Stop("Dharwad, Karnataka", 2400),
                 Stop("Hubli, Karnataka", 2480),
-                Stop("Bangalore, Karnataka", 2570)
+                Stop("Davanagere, Karnataka", 2550),
+                Stop("Tumkur, Karnataka", 2600),
+                Stop("Hosur, Tamil Nadu", 2650),
+                Stop("Bangalore, Karnataka", 2700),
+                Stop("Electronic City, Karnataka", 2720),
+                Stop("Mysuru, Karnataka", 2800),
+                Stop("Ooty, Tamil Nadu", 3000),
+                Stop("Coimbatore, Tamil Nadu", 3100),
+                Stop("Salem, Tamil Nadu", 3200),
+                Stop("Erode, Tamil Nadu", 3300),
+                Stop("Tiruppur, Tamil Nadu", 3400),
+                Stop("Coonoor, Tamil Nadu", 3500),
+                Stop("Palakkad, Kerala", 3600),
+                Stop("Thrissur, Kerala", 3700),
+                Stop("Kochi, Kerala", 3800),
+                Stop("Alappuzha, Kerala", 3900),
+                Stop("Kollam, Kerala", 4000),
+                Stop("Trivandrum, Kerala", 4100),
+                Stop("Kanyakumari, Tamil Nadu", 4200)
             )
         }
     }
-    private fun <T : View> findViewById(id: Int): T {
+
+    private inline fun <reified T : android.view.View> findViewById(id: Int): T {
         return activity.findViewById(id)
     }
 }
